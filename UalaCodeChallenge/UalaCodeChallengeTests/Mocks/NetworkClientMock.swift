@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Combine
+@preconcurrency import Combine
 @testable import UalaCodeChallenge
 
 struct TestModel: Decodable, Equatable {
@@ -31,7 +31,13 @@ final class NetworkClientMock: NetworkClient {
         case .success(let data):
             return Just(data)
                 .decode(type: T.self, decoder: JSONDecoder())
-                .mapError { NetworkError.decodingFailed($0) }
+                .mapError { error in
+                    if let networkError = error as? NetworkError {
+                        return networkError
+                    } else {
+                        return .decodingFailed(error)
+                    }
+                }
                 .eraseToAnyPublisher()
 
         case .failure(let error):
@@ -39,7 +45,7 @@ final class NetworkClientMock: NetworkClient {
                 .eraseToAnyPublisher()
 
         case .none:
-            fatalError("stubbedResult must be set before calling request")
+            fatalError("stubbedResult not set")
         }
     }
 }

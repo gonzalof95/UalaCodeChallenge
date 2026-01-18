@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import Combine
+@preconcurrency import Combine
 @testable import UalaCodeChallenge
 
 final class NetworkClientTests: XCTestCase {
