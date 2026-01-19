@@ -14,22 +14,20 @@ final class CitiesViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var searchText: String = "" {
-        didSet {
-            filterCitiesInBackground()
-        }
+        didSet { filterCitiesInBackground() }
     }
     @Published private var favoriteCityIDs: Set<Int> = []
     @Published var showFavoritesOnly: Bool = false {
-        didSet {
-            filterCitiesInBackground()
-        }
+        didSet { filterCitiesInBackground() }
     }
 
     private let service: CitiesServiceProtocol
+    private let storage: FavoritesStorage
     private var filterTask: Task<Void, Never>?
 
-    init(service: CitiesServiceProtocol) {
+    init(service: CitiesServiceProtocol, storage: FavoritesStorage = UserDefaultsFavoritesStorage()) {
         self.service = service
+        self.storage = storage
         loadFavorites()
     }
 
@@ -90,15 +88,13 @@ extension CitiesViewModel {
     }
 }
 
-// MARK: Favorites persistence
+// MARK: Handle Persistence
 private extension CitiesViewModel {
     func loadFavorites() {
-        if let saved = UserDefaults.standard.array(forKey: "favoriteCities") as? [Int] {
-            favoriteCityIDs = Set(saved)
-        }
+        favoriteCityIDs = Set(storage.loadFavoriteIDs())
     }
 
     func saveFavorites() {
-        UserDefaults.standard.set(Array(favoriteCityIDs), forKey: "favoriteCities")
+        storage.saveFavoriteIDs(Array(favoriteCityIDs))
     }
 }

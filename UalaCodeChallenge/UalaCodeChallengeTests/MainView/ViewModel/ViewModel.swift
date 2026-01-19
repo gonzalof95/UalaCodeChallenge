@@ -89,7 +89,7 @@ final class CitiesViewModelTests: XCTestCase {
         viewModel.showFavoritesOnly = true
 
         // When
-        viewModel.toggleFavorite(cities[1]) 
+        viewModel.toggleFavorite(cities[1])
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         // Then
