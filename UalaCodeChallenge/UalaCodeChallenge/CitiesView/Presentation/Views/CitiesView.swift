@@ -52,7 +52,7 @@ struct LandscapeCitiesView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-
+            // Left side of screen
             CitiesListView(viewModel: viewModel) { city, _ in
                 Button {
                     selectedCity = city
@@ -60,23 +60,42 @@ struct LandscapeCitiesView: View {
                     CityRowView(
                         city: city,
                         isFavorite: viewModel.isFavorite(city),
-                        onFavoriteTapped: { viewModel.toggleFavorite(city) }
+                        onFavoriteTapped: {
+                            viewModel.toggleFavorite(city)
+                        }
                     )
                     .padding(.horizontal, 8)
                 }
                 .buttonStyle(.plain)
             }
-            .frame(width: screenBounds.width / 2)
+            .frame(maxHeight: .infinity)
+            .frame(
+                width: screenBounds.width / 2,
+                height: screenBounds.height
+            )
+            .background(Color.white)
 
+            // Rigth side of screen
             Group {
                 if let city = selectedCity {
                     CityMapView(city: city)
                         .id(city.id)
                 } else {
-                    PlaceholderMapView()
+                    ZStack {
+                        Color.gray.opacity(0.1)
+                        Text("Select a city to show on the map")
+                            .foregroundColor(.secondary)
+                            .font(.headline)
+                    }
                 }
             }
-            .frame(width: screenBounds.width / 2)
+            .frame(
+                width: screenBounds.width / 2,
+                height: screenBounds.height
+            )
+        }
+        .onAppear {
+            Task { await viewModel.loadCities() }
         }
     }
 }

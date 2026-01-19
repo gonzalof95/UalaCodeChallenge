@@ -7,16 +7,12 @@
 
 import SwiftUI
 
-struct CitiesListView<RowAction: View>: View {
+struct CitiesListView<RowContent: View>: View {
     @ObservedObject var viewModel: CitiesViewModel
-    let rowAction: (CityModel, Int) -> RowAction
+    let rowContent: (CityModel, Int) -> RowContent
 
     var body: some View {
         VStack(spacing: 0) {
-            CitiesSearchBar(viewModel: viewModel)
-                .padding(.vertical, 4)
-                .padding(.horizontal, 8)
-
             content
         }
         .background(Color.white)
@@ -28,21 +24,39 @@ struct CitiesListView<RowAction: View>: View {
     @ViewBuilder
     private var content: some View {
         if viewModel.isLoading {
-            ProgressView("Loading cities…")
-                .padding()
+            loadingView
         } else if let error = viewModel.errorMessage {
-            Text(error)
-                .foregroundColor(.red)
-                .multilineTextAlignment(.center)
-                .padding()
+            errorView(error)
         } else {
+            listView
+        }
+    }
+
+    private var loadingView: some View {
+        ProgressView("Loading cities…")
+            .padding()
+    }
+
+    private func errorView(_ message: String) -> some View {
+        Text(message)
+            .foregroundColor(.red)
+            .multilineTextAlignment(.center)
+            .padding()
+    }
+
+    private var listView: some View {
+        VStack(spacing: 0) {
+            CitiesSearchBar(viewModel: viewModel)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(
                         Array(viewModel.visibleCities.enumerated()),
                         id: \.element.id
                     ) { index, city in
-                        rowAction(city, index)
+                        rowContent(city, index)
                             .background(rowBackground(for: index))
                     }
                 }
@@ -56,4 +70,3 @@ struct CitiesListView<RowAction: View>: View {
             : Color.gray.opacity(0.10)
     }
 }
-

@@ -33,9 +33,9 @@ struct CityMapView: View {
                 Marker("City", coordinate: CLLocationCoordinate2D(latitude: city.coord.lat, longitude: city.coord.lon))
             }
             .animation(.easeInOut(duration: 1.0), value: cameraPosition)
-            .ignoresSafeArea(edges: .all)
+            //.ignoresSafeArea(edges: .all)
         }
-        .ignoresSafeArea(edges: .all)
+        //.ignoresSafeArea(edges: .all)
         .onAppear {
             animateZoomToCity()
         }
