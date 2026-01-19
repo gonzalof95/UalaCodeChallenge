@@ -1,5 +1,5 @@
 //
-//  Repository.swift
+//  CitiesRepository.swift
 //  UalaCodeChallenge
 //
 //  Created by Gonzalo Fuentes on 18/01/2026.
@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 protocol CitiesRepositoryProtocol {
-    func fetchCities() async throws -> [City]
+    func fetchCities() async throws -> [CityModel]
 }
 
 final class CitiesRepository: CitiesRepositoryProtocol {
@@ -21,7 +21,7 @@ final class CitiesRepository: CitiesRepositoryProtocol {
         self.url = url
     }
 
-    func fetchCities() async throws -> [City] {
+    func fetchCities() async throws -> [CityModel] {
         try await client.request(url)
     }
 }

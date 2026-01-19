@@ -1,5 +1,5 @@
 //
-//  ServiceTests.swift
+//  CitiesServiceTests.swift
 //  UalaCodeChallenge
 //
 //  Created by Gonzalo Fuentes on 18/01/2026.
@@ -28,7 +28,7 @@ final class CitiesServiceTests: XCTestCase {
     func testFetchCitiesSuccess() async throws {
         // GIVEN
         let expectedCities = [
-            City(id: 1, name: "Hurzuf", country: "UA", coord: Coordinate(lon: 34.28, lat: 44.54))
+            CityModel(id: 1, name: "Hurzuf", country: "UA", coord: CityCoordinate(lon: 34.28, lat: 44.54))
         ]
         repository.stubbedResult = .success(expectedCities)
 
@@ -48,7 +48,7 @@ final class CitiesServiceTests: XCTestCase {
 
         // WHEN / THEN
         do {
-            let _: [City] = try await service.fetchCities()
+            let _: [CityModel] = try await service.fetchCities()
             XCTFail("Expected failure")
         } catch let error as NetworkError {
             XCTAssertEqual(error, .invalidResponse)

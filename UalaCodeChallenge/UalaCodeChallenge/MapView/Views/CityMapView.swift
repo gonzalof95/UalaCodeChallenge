@@ -9,11 +9,11 @@ import SwiftUI
 import MapKit
 
 struct CityMapView: View {
-    let city: City
+    let city: CityModel
     @Environment(\.dismiss) var dismiss
     @State private var cameraPosition: MapCameraPosition
 
-    init(city: City) {
+    init(city: CityModel) {
         self.city = city
 
         let initialCamera = MapCamera(

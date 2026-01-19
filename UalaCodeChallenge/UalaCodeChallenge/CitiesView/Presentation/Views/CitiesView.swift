@@ -1,5 +1,5 @@
 //
-//  MainView.swift
+//  CitiesView.swift
 //  UalaCodeChallenge
 //
 //  Created by Gonzalo Fuentes on 18/01/2026.
@@ -32,7 +32,7 @@ struct CitiesView: View {
     @ObservedObject var viewModel: CitiesViewModel
 
     var body: some View {
-        NavigationStack { // Navigation context
+        NavigationStack {
             VStack(spacing: 8) {
                 if viewModel.isLoading {
                     ProgressView("Loading cities…")
@@ -45,11 +45,11 @@ struct CitiesView: View {
                 } else {
                     CitiesSearchBar(viewModel: viewModel)
                         .padding(.vertical, 4)
+                        .padding(.trailing, 8)
                     
                     ScrollView {
                         LazyVStack(spacing: 0) {
                             ForEach(Array(viewModel.visibleCities.enumerated()), id: \.element.id) { index, city in
-                                // Wrap the row in a NavigationLink
                                 NavigationLink(value: city) {
                                     CityRowView(
                                         city: city,
@@ -60,14 +60,14 @@ struct CitiesView: View {
                                         index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.10)
                                     )
                                 }
-                                .buttonStyle(.plain) // removes default highlight effect
+                                .buttonStyle(.plain)
                             }
                         }
                     }
                 }
             }
             .background(Color.white)
-            .navigationDestination(for: City.self) { city in
+            .navigationDestination(for: CityModel.self) { city in
                 CityMapView(city: city)
             }
             .onAppear { Task { await viewModel.loadCities() } }

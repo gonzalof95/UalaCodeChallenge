@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct City: nonisolated Decodable, Identifiable, Hashable {
+struct CityModel: nonisolated Decodable, Identifiable, Hashable {
     let id: Int
     let name: String
     let country: String
-    let coord: Coordinate
+    let coord: CityCoordinate
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
@@ -21,7 +21,7 @@ struct City: nonisolated Decodable, Identifiable, Hashable {
     }
 }
 
-struct Coordinate: Decodable, Hashable {
+struct CityCoordinate: Decodable, Hashable {
     let lon: Double
     let lat: Double
 }

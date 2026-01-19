@@ -1,5 +1,5 @@
 //
-//  RepositoryTests.swift
+//  CitiesRepositoryTests.swift
 //  UalaCodeChallenge
 //
 //  Created by Gonzalo Fuentes on 18/01/2026.
@@ -43,7 +43,7 @@ final class CitiesRepositoryTests: XCTestCase {
         repository = CitiesRepository(client: networkClient, url: url)
 
         // WHEN
-        let cities = try await repository.fetchCities() as [City]
+        let cities = try await repository.fetchCities() as [CityModel]
 
         // THEN
         XCTAssertEqual(cities.count, 1)
@@ -78,4 +78,3 @@ final class CitiesRepositoryTests: XCTestCase {
         XCTAssertEqual(networkClient.invokedRequestURL, url)
     }
 }
-

@@ -1,5 +1,5 @@
 //
-//  ViewModel.swift
+//  CitiesViewModel.swift
 //  UalaCodeChallenge
 //
 //  Created by Gonzalo Fuentes on 18/01/2026.
@@ -9,8 +9,8 @@ import Foundation
 import Combine
 
 final class CitiesViewModel: ObservableObject {
-    @Published private(set) var cities: [City] = []
-    @Published var visibleCities: [City] = []
+    @Published private(set) var cities: [CityModel] = []
+    @Published var visibleCities: [CityModel] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var searchText: String = "" {
@@ -80,11 +80,11 @@ private extension CitiesViewModel {
 
 // MARK: Handle favorites
 extension CitiesViewModel {
-    func isFavorite(_ city: City) -> Bool {
+    func isFavorite(_ city: CityModel) -> Bool {
         favoriteCityIDs.contains(city.id)
     }
 
-    func toggleFavorite(_ city: City) {
+    func toggleFavorite(_ city: CityModel) {
         if favoriteCityIDs.contains(city.id) {
             favoriteCityIDs.remove(city.id)
         } else {

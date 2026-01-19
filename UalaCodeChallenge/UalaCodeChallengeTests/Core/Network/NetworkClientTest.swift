@@ -39,7 +39,7 @@ final class NetworkClientTests: XCTestCase {
         mock.stubbedResult = .success(json)
 
         // When
-        let city: City = try await mock.request(testURL)
+        let city: CityModel = try await mock.request(testURL)
 
         // Then
         XCTAssertEqual(city.name, "Hurzuf")
@@ -55,7 +55,7 @@ final class NetworkClientTests: XCTestCase {
 
         // When / Then
         do {
-            let _: City = try await mock.request(testURL)
+            let _: CityModel = try await mock.request(testURL)
             XCTFail("Expected invalidResponse error")
         } catch let error as NetworkError {
             XCTAssertEqual(error, .invalidResponse)
@@ -81,7 +81,7 @@ final class NetworkClientTests: XCTestCase {
 
         // When / Then
         do {
-            let _: City = try await mock.request(testURL)
+            let _: CityModel = try await mock.request(testURL)
             XCTFail("Expected decodingFailed error")
         } catch let error as NetworkError {
             if case .decodingFailed = error {
@@ -103,7 +103,7 @@ final class NetworkClientTests: XCTestCase {
 
         // When / Then
         do {
-            let _: City = try await mock.request(testURL)
+            let _: CityModel = try await mock.request(testURL)
             XCTFail("Expected no internet error")
         } catch let error as NetworkError {
             XCTAssertEqual(error, .requestFailed(urlError))

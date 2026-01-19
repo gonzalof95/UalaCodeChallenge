@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CityRowView: View {
-    let city: City
+    let city: CityModel
     let isFavorite: Bool
     let onFavoriteTapped: () -> Void
 
@@ -17,10 +17,12 @@ struct CityRowView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(city.name), \(city.country)")
                     .font(.headline)
-
+                    .padding(.leading, 8)
+                
                 Text("Lat: \(city.coord.lat), Lon: \(city.coord.lon)")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .padding(.leading, 8)
             }
 
             Spacer()
@@ -29,6 +31,7 @@ struct CityRowView: View {
                 Image(systemName: isFavorite ? "heart.fill" : "heart")
                     .foregroundColor(isFavorite ? .red : .gray)
             }
+            .padding(.trailing, 8)
             .buttonStyle(.plain)
         }
         .padding(.vertical, 12)

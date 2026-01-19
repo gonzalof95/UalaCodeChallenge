@@ -1,5 +1,5 @@
 //
-//  RepositoryMock.swift
+//  CitiesRepositoryMock.swift
 //  UalaCodeChallenge
 //
 //  Created by Gonzalo Fuentes on 18/01/2026.
@@ -14,7 +14,7 @@ final class CitiesRepositoryMock: CitiesRepositoryProtocol {
     private(set) var invokedFetchCitiesCount = 0
 
     // MARK: - Stubbing
-    var stubbedResult: Result<[City], NetworkError>!
+    var stubbedResult: Result<[CityModel], NetworkError>!
 
     func fetchCities<T: Decodable>() async throws -> T {
         invokedFetchCities = true

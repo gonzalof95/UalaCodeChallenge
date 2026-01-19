@@ -1,5 +1,5 @@
 //
-//  ViewModel.swift
+//  CitiesViewModel.swift
 //  UalaCodeChallenge
 //
 //  Created by Gonzalo Fuentes on 19/01/2026.
@@ -29,8 +29,8 @@ final class CitiesViewModelTests: XCTestCase {
     func testLoadCitiesSuccess() async {
         // Given
         let cities = [
-            City(id: 1, name: "Hurzuf", country: "UA", coord: Coordinate(lon: 34, lat: 44)),
-            City(id: 2, name: "Sydney", country: "AU", coord: Coordinate(lon: 151, lat: -33))
+            CityModel(id: 1, name: "Hurzuf", country: "UA", coord: CityCoordinate(lon: 34, lat: 44)),
+            CityModel(id: 2, name: "Sydney", country: "AU", coord: CityCoordinate(lon: 151, lat: -33))
         ]
         service.stubbedResult = .success(cities)
 
@@ -62,8 +62,8 @@ final class CitiesViewModelTests: XCTestCase {
     func testSearchFiltering() async {
         // Given
         let cities = [
-            City(id: 1, name: "Hurzuf", country: "UA", coord: Coordinate(lon: 34, lat: 44)),
-            City(id: 2, name: "Sydney", country: "AU", coord: Coordinate(lon: 151, lat: -33))
+            CityModel(id: 1, name: "Hurzuf", country: "UA", coord: CityCoordinate(lon: 34, lat: 44)),
+            CityModel(id: 2, name: "Sydney", country: "AU", coord: CityCoordinate(lon: 151, lat: -33))
         ]
         service.stubbedResult = .success(cities)
         await viewModel.loadCities()
@@ -81,8 +81,8 @@ final class CitiesViewModelTests: XCTestCase {
     func testToggleFavoriteUpdatesVisibleCities() async {
         // Given
         let cities = [
-            City(id: 1, name: "Hurzuf", country: "UA", coord: Coordinate(lon: 34, lat: 44)),
-            City(id: 2, name: "Sydney", country: "AU", coord: Coordinate(lon: 151, lat: -33))
+            CityModel(id: 1, name: "Hurzuf", country: "UA", coord: CityCoordinate(lon: 34, lat: 44)),
+            CityModel(id: 2, name: "Sydney", country: "AU", coord: CityCoordinate(lon: 151, lat: -33))
         ]
         service.stubbedResult = .success(cities)
         await viewModel.loadCities()
@@ -103,9 +103,9 @@ final class CitiesViewModelTests: XCTestCase {
         mockStorage.loadedIDs = [1, 2]
         let vm = CitiesViewModel(service: service, storage: mockStorage)
 
-        XCTAssertTrue(vm.isFavorite(City(id: 1, name: "", country: "", coord: Coordinate(lon: 0, lat: 0))))
+        XCTAssertTrue(vm.isFavorite(CityModel(id: 1, name: "", country: "", coord: CityCoordinate(lon: 0, lat: 0))))
         
-        vm.toggleFavorite(City(id: 3, name: "", country: "", coord: Coordinate(lon: 0, lat: 0)))
+        vm.toggleFavorite(CityModel(id: 3, name: "", country: "", coord: CityCoordinate(lon: 0, lat: 0)))
         XCTAssertEqual(mockStorage.savedIDs.sorted(), [1, 2, 3])
     }
 }
