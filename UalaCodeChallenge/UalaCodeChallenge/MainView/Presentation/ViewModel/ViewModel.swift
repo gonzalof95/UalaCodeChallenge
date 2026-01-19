@@ -24,6 +24,7 @@ final class CitiesViewModel: ObservableObject {
     private let service: CitiesServiceProtocol
     private let storage: FavoritesStorage
     private var filterTask: Task<Void, Never>?
+    private var hasLoadedCities = false
 
     init(service: CitiesServiceProtocol, storage: FavoritesStorage = UserDefaultsFavoritesStorage()) {
         self.service = service
@@ -32,10 +33,16 @@ final class CitiesViewModel: ObservableObject {
     }
 
     func loadCities() async {
+        guard !hasLoadedCities else {
+            filterCitiesInBackground()
+            return
+        }
+
         isLoading = true
         errorMessage = nil
         do {
             cities = try await service.fetchCities()
+            hasLoadedCities = true
             filterCitiesInBackground()
         } catch {
             errorMessage = error.localizedDescription
