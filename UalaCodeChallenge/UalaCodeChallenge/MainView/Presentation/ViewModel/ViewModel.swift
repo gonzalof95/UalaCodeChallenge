@@ -10,31 +10,71 @@ import Combine
 
 final class CitiesViewModel: ObservableObject {
     @Published private(set) var cities: [City] = []
+    @Published var visibleCities: [City] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var searchText: String = ""
+    @Published var searchText: String = "" {
+        didSet {
+            filterCitiesInBackground()
+        }
+    }
     @Published private var favoriteCityIDs: Set<Int> = []
-    @Published var showFavoritesOnly: Bool = false
+    @Published var showFavoritesOnly: Bool = false {
+        didSet {
+            filterCitiesInBackground()
+        }
+    }
+
     private let service: CitiesServiceProtocol
-    private var cancellables = Set<AnyCancellable>()
+    private var filterTask: Task<Void, Never>?
 
     init(service: CitiesServiceProtocol) {
         self.service = service
         loadFavorites()
     }
 
-    var visibleCities: [City] {
-        cities
-            .filter { city in
-                (searchText.isEmpty ||
-                 city.name.localizedCaseInsensitiveContains(searchText) ||
-                 city.country.localizedCaseInsensitiveContains(searchText))
-                &&
-                (!showFavoritesOnly || isFavorite(city))
-            }
-            .sorted { $0.name == $1.name ? $0.country < $1.country : $0.name < $1.name }
+    func loadCities() async {
+        isLoading = true
+        errorMessage = nil
+        do {
+            cities = try await service.fetchCities()
+            filterCitiesInBackground()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
     }
+}
 
+// MARK: Filtering for search bar
+private extension CitiesViewModel {
+    func filterCitiesInBackground() {
+        filterTask?.cancel()
+
+        let currentSearch = searchText
+        let currentFavoritesOnly = showFavoritesOnly
+        let allCities = cities
+        let favoriteIDs = favoriteCityIDs
+
+        filterTask = Task.detached(priority: .userInitiated) {
+            let filtered = allCities
+                .filter { city in
+                    (currentSearch.isEmpty ||
+                     city.name.localizedCaseInsensitiveContains(currentSearch) ||
+                     city.country.localizedCaseInsensitiveContains(currentSearch))
+                    && (!currentFavoritesOnly || favoriteIDs.contains(city.id))
+                }
+                .sorted { $0.name == $1.name ? $0.country < $1.country : $0.name < $1.name }
+
+            await MainActor.run {
+                self.visibleCities = filtered
+            }
+        }
+    }
+}
+
+// MARK: Handle favorites
+extension CitiesViewModel {
     func isFavorite(_ city: City) -> Bool {
         favoriteCityIDs.contains(city.id)
     }
@@ -46,27 +86,19 @@ final class CitiesViewModel: ObservableObject {
             favoriteCityIDs.insert(city.id)
         }
         saveFavorites()
+        filterCitiesInBackground()
     }
+}
 
-    func loadCities() async {
-        isLoading = true
-        errorMessage = nil
-        do {
-            cities = try await service.fetchCities()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-        isLoading = false
-    }
-
-    // MARK: - Favorites persistence
-    private func loadFavorites() {
+// MARK: Favorites persistence
+private extension CitiesViewModel {
+    func loadFavorites() {
         if let saved = UserDefaults.standard.array(forKey: "favoriteCities") as? [Int] {
             favoriteCityIDs = Set(saved)
         }
     }
 
-    private func saveFavorites() {
+    func saveFavorites() {
         UserDefaults.standard.set(Array(favoriteCityIDs), forKey: "favoriteCities")
     }
 }
