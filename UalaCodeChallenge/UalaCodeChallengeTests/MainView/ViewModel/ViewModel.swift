@@ -97,5 +97,15 @@ final class CitiesViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.isFavorite(cities[1]))
         XCTAssertFalse(viewModel.isFavorite(cities[0]))
     }
-}
+    
+    func testFavoritesPersistence() {
+        let mockStorage = MockFavoritesStorage()
+        mockStorage.loadedIDs = [1, 2]
+        let vm = CitiesViewModel(service: service, storage: mockStorage)
 
+        XCTAssertTrue(vm.isFavorite(City(id: 1, name: "", country: "", coord: Coordinate(lon: 0, lat: 0))))
+        
+        vm.toggleFavorite(City(id: 3, name: "", country: "", coord: Coordinate(lon: 0, lat: 0)))
+        XCTAssertEqual(mockStorage.savedIDs.sorted(), [1, 2, 3])
+    }
+}
