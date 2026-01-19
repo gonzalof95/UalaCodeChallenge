@@ -36,38 +36,32 @@ struct CitiesView: View {
             if viewModel.isLoading {
                 ProgressView("Loading cities…")
                     .padding()
-
             } else if let error = viewModel.errorMessage {
                 Text(error)
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding()
-
             } else {
                 CitiesSearchBar(viewModel: viewModel)
                     .padding(.vertical, 4)
                 
-                List {
-                    ForEach(Array(viewModel.visibleCities.enumerated()), id: \.element.id) { index, city in
-                        CityRowView(
-                            city: city,
-                            isFavorite: viewModel.isFavorite(city),
-                            onFavoriteTapped: { viewModel.toggleFavorite(city) }
-                        )
-                        .listRowInsets(EdgeInsets())
-                        .background(
-                            index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.05)
-                        )
-                        .listRowSeparator(.hidden)
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(viewModel.visibleCities.enumerated()), id: \.element.id) { index, city in
+                            CityRowView(
+                                city: city,
+                                isFavorite: viewModel.isFavorite(city),
+                                onFavoriteTapped: { viewModel.toggleFavorite(city) }
+                            )
+                            .background(
+                                index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.10)
+                            )
+                        }
                     }
                 }
-                .listStyle(.plain)
             }
         }
         .background(Color.white)
-        .onAppear {
-            Task { await viewModel.loadCities() }
-        }
+        .onAppear { Task { await viewModel.loadCities() } }
     }
 }
-

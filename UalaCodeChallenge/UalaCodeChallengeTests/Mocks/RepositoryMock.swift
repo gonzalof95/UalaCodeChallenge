@@ -5,7 +5,7 @@
 //  Created by Gonzalo Fuentes on 18/01/2026.
 //
 
-import Combine
+import Foundation
 @testable import UalaCodeChallenge
 
 final class CitiesRepositoryMock: CitiesRepositoryProtocol {

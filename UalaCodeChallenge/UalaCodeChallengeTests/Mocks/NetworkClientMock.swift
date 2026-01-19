@@ -6,7 +6,6 @@
 //
 
 import Foundation
-@preconcurrency import Combine
 @testable import UalaCodeChallenge
 
 final class NetworkClientMock: NetworkClient {
