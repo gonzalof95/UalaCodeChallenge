@@ -22,7 +22,6 @@ final class CitiesViewModel: ObservableObject {
         self.service = service
     }
 
-    // MARK: - Derived data (for the View)
     var visibleCities: [City] {
         cities
             .filter { city in
@@ -50,20 +49,17 @@ final class CitiesViewModel: ObservableObject {
         }
     }
 
-    func loadCities() {
+    func loadCities() async {
         isLoading = true
         errorMessage = nil
 
-        service.fetchCities()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] completion in
-                self?.isLoading = false
-                if case .failure(let error) = completion {
-                    self?.errorMessage = error.localizedDescription
-                }
-            } receiveValue: { [weak self] (cities: [City]) in
-                self?.cities = cities
-            }
-            .store(in: &cancellables)
+        do {
+            let fetched = try await service.fetchCities()
+            cities = fetched
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
     }
 }

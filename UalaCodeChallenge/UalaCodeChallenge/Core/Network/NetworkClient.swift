@@ -39,7 +39,7 @@ enum NetworkError: Error, Equatable {
 }
 
 protocol NetworkClient {
-    func request<T: Decodable>(_ url: URL) -> AnyPublisher<T, NetworkError>
+    func request<T: Decodable>(_ url: URL) async throws -> T
 }
 
 final class URLSessionNetworkClient: NetworkClient {
@@ -50,31 +50,34 @@ final class URLSessionNetworkClient: NetworkClient {
         self.session = session
         self.logger = logger
     }
-    
-    func request<T: Decodable>(_ url: URL) -> AnyPublisher<T, NetworkError> {
+
+    func request<T: Decodable>(_ url: URL) async throws -> T {
         logger.log("Starting request: \(url.absoluteString)")
-        
-        return session.dataTaskPublisher(for: url)
-            .mapError { NetworkError.requestFailed($0) }
-            .tryMap { output -> Data in
-                guard let response = output.response as? HTTPURLResponse,
-                      200..<300 ~= response.statusCode else {
-                    throw NetworkError.invalidResponse
-                }
-                
-                self.logger.log("Received response: \(response.statusCode)")
-                return output.data
+
+        do {
+            let (data, response) = try await session.data(from: url)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200..<300 ~= httpResponse.statusCode else {
+                logger.error("Invalid response")
+                throw NetworkError.invalidResponse
             }
-            .decode(type: T.self, decoder: JSONDecoder())
-            .mapError { error -> NetworkError in
-                if let networkError = error as? NetworkError {
-                    self.logger.error("Network error: \(networkError)")
-                    return networkError
-                } else {
-                    self.logger.error("Decoding error: \(error)")
-                    return .decodingFailed(error)
-                }
+
+            logger.log("Received response: \(httpResponse.statusCode)")
+
+            do {
+                return try JSONDecoder().decode(T.self, from: data)
+            } catch {
+                logger.error("Decoding failed: \(error)")
+                throw NetworkError.decodingFailed(error)
             }
-            .eraseToAnyPublisher()
+
+        } catch let error as URLError {
+            logger.error("Request failed: \(error)")
+            throw NetworkError.requestFailed(error)
+        } catch {
+            logger.error("Unknown error: \(error)")
+            throw NetworkError.unknown
+        }
     }
 }

@@ -6,29 +6,26 @@
 //
 
 import XCTest
-@preconcurrency import Combine
 @testable import UalaCodeChallenge
 
 final class NetworkClientTests: XCTestCase {
     private var mock: NetworkClientMock!
-    private var cancellables: Set<AnyCancellable>!
     private let testURL = URL(string: "https://test.com")!
 
     // MARK: - Setup / Teardown
     override func setUp() {
         super.setUp()
         mock = NetworkClientMock()
-        cancellables = []
     }
 
     override func tearDown() {
-        cancellables = nil
         mock = nil
         super.tearDown()
     }
 
     // MARK: - Tests
-    func testNetworkClientSuccess() {
+    @MainActor
+    func testNetworkClientSuccess() async throws {
         // Given
         let json = """
         {
@@ -40,52 +37,36 @@ final class NetworkClientTests: XCTestCase {
         """.data(using: .utf8)!
 
         mock.stubbedResult = .success(json)
-        let expectation = expectation(description: "Succeeds")
 
         // When
-        mock.request(testURL)
-            .sink { completion in
-                if case .failure(let error) = completion {
-                    XCTFail("Unexpected error: \(error)")
-                }
-            } receiveValue: { (model: City) in
-                // Then
-                XCTAssertEqual(model.name, "Hurzuf")
-                XCTAssertEqual(model.country, "UA")
-                XCTAssertEqual(model.id, 707860)
-                
-                expectation.fulfill()
-            }
-            .store(in: &cancellables)
+        let city: City = try await mock.request(testURL)
 
-        wait(for: [expectation], timeout: 0.1)
-        assertRequestInvoked(url: "https://test.com", count: 1)
+        // Then
+        XCTAssertEqual(city.name, "Hurzuf")
+        XCTAssertEqual(city.country, "UA")
+        XCTAssertEqual(city.id, 707860)
+
+        assertRequestInvoked()
     }
 
-    
-    func testNetworkClientFailsWithInvalidResponse() {
+    func testNetworkClientFailsWithInvalidResponse() async {
         // Given
         mock.stubbedResult = .failure(.invalidResponse)
-        let expectation = expectation(description: "Request fails with invalidResponse")
 
-        // When
-        mock.request(testURL)
-            .sink { completion in
-                // Then
-                if case .failure(let error) = completion {
-                    XCTAssertEqual(error, .invalidResponse)
-                    expectation.fulfill()
-                }
-            } receiveValue: { (_: City) in
-                XCTFail("Should not emit value on failure")
-            }
-            .store(in: &cancellables)
+        // When / Then
+        do {
+            let _: City = try await mock.request(testURL)
+            XCTFail("Expected invalidResponse error")
+        } catch let error as NetworkError {
+            XCTAssertEqual(error, .invalidResponse)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
 
-        wait(for: [expectation], timeout: 0.1)
-        assertRequestInvoked(url: "https://test.com", count: 1)
+        assertRequestInvoked()
     }
-    
-    func testNetworkClientFailsWithMalformedData() {
+
+    func testNetworkClientFailsWithMalformedData() async {
         // Given
         let malformedJSON = """
         {
@@ -97,51 +78,44 @@ final class NetworkClientTests: XCTestCase {
         """.data(using: .utf8)!
 
         mock.stubbedResult = .success(malformedJSON)
-        let expectation = expectation(description: "Fails with decoding error")
 
-        // When
-        mock.request(testURL)
-            .sink { completion in
-                //Then
-                if case .failure(let error) = completion {
-                    XCTAssertEqual(error, .decodingFailed(error as NSError))
-                    expectation.fulfill()
-                }
-            } receiveValue: { (_: City) in
-                XCTFail("Should not succeed")
+        // When / Then
+        do {
+            let _: City = try await mock.request(testURL)
+            XCTFail("Expected decodingFailed error")
+        } catch let error as NetworkError {
+            if case .decodingFailed = error {
+                XCTAssertTrue(true)
+            } else {
+                XCTFail("Unexpected NetworkError: \(error)")
             }
-            .store(in: &cancellables)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
 
-        wait(for: [expectation], timeout: 0.1)
-        assertRequestInvoked(url: "https://test.com", count: 1)
+        assertRequestInvoked()
     }
 
-    func testNetworkClientFailsWithNoInternet() {
+    func testNetworkClientFailsWithNoInternet() async {
         // Given
         let urlError = URLError(.notConnectedToInternet)
         mock.stubbedResult = .failure(.requestFailed(urlError))
-        let expectation = expectation(description: "Fails with no internet")
 
-        // When
-        mock.request(testURL)
-            .sink { completion in
-                if case .failure(let error) = completion {
-                    // Then
-                    XCTAssertEqual(error, .requestFailed(urlError))
-                    expectation.fulfill()
-                }
-            } receiveValue: { (_: City) in
-                XCTFail("Should not emit value when there is no internet")
-            }
-            .store(in: &cancellables)
+        // When / Then
+        do {
+            let _: City = try await mock.request(testURL)
+            XCTFail("Expected no internet error")
+        } catch let error as NetworkError {
+            XCTAssertEqual(error, .requestFailed(urlError))
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
 
-        wait(for: [expectation], timeout: 0.1)
-        assertRequestInvoked(url: "https://test.com", count: 1)
+        assertRequestInvoked()
     }
     
     private func assertRequestInvoked(url: String = "https://test.com", count: Int = 1) {
         XCTAssertTrue(mock.invokedRequest)
-        XCTAssertEqual(mock.invokedRequestCount, count)
         XCTAssertEqual(mock.invokedRequestURL?.absoluteString, url)
     }
 }

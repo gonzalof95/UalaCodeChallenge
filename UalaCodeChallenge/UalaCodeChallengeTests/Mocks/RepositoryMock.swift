@@ -14,25 +14,24 @@ final class CitiesRepositoryMock: CitiesRepositoryProtocol {
     private(set) var invokedFetchCitiesCount = 0
 
     // MARK: - Stubbing
-    var stubbedResult: Result<Any, NetworkError>!
+    var stubbedResult: Result<[City], NetworkError>!
 
-    func fetchCities<T: Decodable>() -> AnyPublisher<T, NetworkError> {
+    func fetchCities<T: Decodable>() async throws -> T {
         invokedFetchCities = true
         invokedFetchCitiesCount += 1
 
         switch stubbedResult {
         case .success(let value):
-            return Just(value as! T)
-                .setFailureType(to: NetworkError.self)
-                .eraseToAnyPublisher()
+            guard let typedValue = value as? T else {
+                fatalError("Type mismatch in mock")
+            }
+            return typedValue
 
         case .failure(let error):
-            return Fail(error: error)
-                .eraseToAnyPublisher()
+            throw error
 
         case .none:
             fatalError("stubbedResult not set")
         }
     }
 }
-

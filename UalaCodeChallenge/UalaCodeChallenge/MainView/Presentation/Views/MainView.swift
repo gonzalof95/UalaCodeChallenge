@@ -77,7 +77,9 @@ struct CitiesView: View {
         .background(Color.white)
         .searchable(text: $viewModel.searchText, prompt: "Search cities")
         .onAppear {
-            viewModel.loadCities()
+            Task {
+                await viewModel.loadCities()
+            }
         }
     }
 }

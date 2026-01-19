@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 protocol CitiesRepositoryProtocol {
-    func fetchCities<T: Decodable>() -> AnyPublisher<T, NetworkError>
+    func fetchCities() async throws -> [City]
 }
 
 final class CitiesRepository: CitiesRepositoryProtocol {
@@ -21,7 +21,7 @@ final class CitiesRepository: CitiesRepositoryProtocol {
         self.url = url
     }
 
-    func fetchCities<T: Decodable>() -> AnyPublisher<T, NetworkError> {
-        client.request(url)
+    func fetchCities() async throws -> [City] {
+        try await client.request(url)
     }
 }

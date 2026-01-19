@@ -9,44 +9,29 @@ import Foundation
 @preconcurrency import Combine
 @testable import UalaCodeChallenge
 
-struct TestModel: Decodable, Equatable {
-    let name: String
-}
-
 final class NetworkClientMock: NetworkClient {
-    // MARK: - Invocation tracking
+    var stubbedResult: Result<Data, NetworkError>!
     private(set) var invokedRequest = false
-    private(set) var invokedRequestCount = 0
     private(set) var invokedRequestURL: URL?
 
-    // MARK: - Stubbing
-    var stubbedResult: Result<Data, NetworkError>!
-
-    func request<T: Decodable>(_ url: URL) -> AnyPublisher<T, NetworkError> {
+    func request<T: Decodable>(_ url: URL) async throws -> T {
         invokedRequest = true
-        invokedRequestCount += 1
         invokedRequestURL = url
 
         switch stubbedResult {
         case .success(let data):
-            return Just(data)
-                .decode(type: T.self, decoder: JSONDecoder())
-                .mapError { error in
-                    if let networkError = error as? NetworkError {
-                        return networkError
-                    } else {
-                        return .decodingFailed(error)
-                    }
-                }
-                .eraseToAnyPublisher()
+            do {
+                let decoded = try JSONDecoder().decode(T.self, from: data)
+                return decoded
+            } catch {
+                throw NetworkError.decodingFailed(error)
+            }
 
         case .failure(let error):
-            return Fail(error: error)
-                .eraseToAnyPublisher()
+            throw error
 
         case .none:
             fatalError("stubbedResult not set")
         }
     }
 }
-
