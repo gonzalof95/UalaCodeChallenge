@@ -27,12 +27,13 @@ struct CityRowView: View {
 
             Button(action: onFavoriteTapped) {
                 Image(systemName: isFavorite ? "heart.fill" : "heart")
-                    .foregroundColor(isFavorite ? .red : .gray)
             }
             .accessibilityIdentifier("favorite_button_\(city.id)")
-            .padding(.trailing, 8)
-            .buttonStyle(.plain)
+            .accessibilityLabel("Favorite")
+            .accessibilityValue(isFavorite ? "favorited" : "not_favorited")
+            .buttonStyle(.borderless)
         }
+        .accessibilityElement(children: .ignore) 
         .padding(.vertical, 12)
         .padding(.horizontal)
     }

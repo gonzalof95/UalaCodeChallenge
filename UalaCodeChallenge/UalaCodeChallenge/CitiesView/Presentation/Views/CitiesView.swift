@@ -27,22 +27,26 @@ struct CitiesView: View {
 
 struct PortraitCitiesView: View {
     @ObservedObject var viewModel: CitiesViewModel
+    @State private var selectedCity: CityModel?
 
     var body: some View {
         CitiesListView(viewModel: viewModel) { city, _ in
-            NavigationLink(value: city) {
-                CityRowView(
-                    city: city,
-                    isFavorite: viewModel.isFavorite(city),
-                    onFavoriteTapped: { viewModel.toggleFavorite(city) }
-                )
-                .accessibilityIdentifier("city_row_\(city.id)")
-                .padding(.leading, 8)
+            CityRowView(
+                city: city,
+                isFavorite: viewModel.isFavorite(city),
+                onFavoriteTapped: {
+                    viewModel.toggleFavorite(city)
+                }
+            )
+            .accessibilityIdentifier("city_row_\(city.id)")
+            .contentShape(Rectangle())
+            .onTapGesture {
+                selectedCity = city
             }
-            .buttonStyle(.plain)
         }
-        .navigationDestination(for: CityModel.self) { city in
+        .navigationDestination(item: $selectedCity) { city in
             CityMapView(city: city)
+                .accessibilityIdentifier("city_map")
         }
     }
 }

@@ -81,6 +81,27 @@ final class UalaCodeChallengeUITests: XCTestCase {
         let filteredCount = allCities.count
         XCTAssertLessThan(filteredCount, initialCount)
     }
+    
+    @MainActor
+    func testTogglingFavorite() {
+        let app = XCUIApplication()
+        app.launch()
+
+        // Wait for list
+        let list = app.scrollViews["cities_list"]
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+
+        // Check favorite button existance
+        let favoriteButton = app.descendants(matching: .button)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@", "favorite_button_"))
+            .firstMatch
+
+        // Check tap works
+        XCTAssertTrue(favoriteButton.waitForExistence(timeout: 5))
+        favoriteButton.tap()
+
+        XCTAssertEqual(favoriteButton.value as? String, "favorited")
+    }
 
     @MainActor
     func testLaunchPerformance() throws {
