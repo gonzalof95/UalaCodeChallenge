@@ -68,8 +68,7 @@ struct CitiesView: View {
             }
             .background(Color.white)
             .navigationDestination(for: City.self) { city in
-                let mapVM = CityMapViewModel(city: city)
-                CityMapView(viewModel: mapVM)
+                CityMapView(city: city)
             }
             .onAppear { Task { await viewModel.loadCities() } }
         }

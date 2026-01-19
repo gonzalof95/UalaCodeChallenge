@@ -9,16 +9,48 @@ import SwiftUI
 import MapKit
 
 struct CityMapView: View {
-    @ObservedObject var viewModel: CityMapViewModel
+    let city: City
     @Environment(\.dismiss) var dismiss
+    @State private var cameraPosition: MapCameraPosition
+
+    init(city: City) {
+        self.city = city
+
+        let initialCamera = MapCamera(
+            centerCoordinate: CLLocationCoordinate2D(
+                latitude: city.coord.lat,
+                longitude: city.coord.lon
+            ),
+            distance: 5000
+        )
+
+        _cameraPosition = State(initialValue: .camera(initialCamera))
+    }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Map(position: $viewModel.cameraPosition, interactionModes: .all) {
-                Marker("City", coordinate: viewModel.cameraPosition.camera?.centerCoordinate ?? .init(latitude: 0, longitude: 0))
+            Map(position: $cameraPosition, interactionModes: .all) {
+                Marker("City", coordinate: CLLocationCoordinate2D(latitude: city.coord.lat, longitude: city.coord.lon))
             }
-            .animation(.easeInOut(duration: 3.0), value: viewModel.cameraPosition)
+            .animation(.easeInOut(duration: 1.0), value: cameraPosition)
             .ignoresSafeArea()
+        }
+        .onAppear {
+            animateZoomToCity()
+        }
+    }
+
+    private func animateZoomToCity() {
+        let targetCamera = MapCamera(
+            centerCoordinate: CLLocationCoordinate2D(
+                latitude: city.coord.lat,
+                longitude: city.coord.lon
+            ),
+            distance: 12000
+        )
+
+        withAnimation(.easeInOut(duration: 1.0)) {
+            cameraPosition = .camera(targetCamera)
         }
     }
 }
