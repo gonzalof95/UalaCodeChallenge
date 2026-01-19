@@ -35,6 +35,6 @@ final class CityMapViewModel: ObservableObject {
             distance: 12000
         )
 
-        cameraPosition = .camera(targetCamera) // SwiftUI animates automatically
+        cameraPosition = .camera(targetCamera)
     }
 }
