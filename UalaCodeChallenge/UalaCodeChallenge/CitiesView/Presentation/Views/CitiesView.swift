@@ -32,46 +32,65 @@ struct CitiesView: View {
     @ObservedObject var viewModel: CitiesViewModel
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 8) {
-                if viewModel.isLoading {
-                    ProgressView("Loading cities…")
-                        .padding()
-                } else if let error = viewModel.errorMessage {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .padding()
+        GeometryReader { geometry in
+            let isPortrait = geometry.size.height >= geometry.size.width
+
+            NavigationStack {
+                if isPortrait {
+                    portraitView()
                 } else {
-                    CitiesSearchBar(viewModel: viewModel)
-                        .padding(.vertical, 4)
-                        .padding(.trailing, 8)
-                    
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(Array(viewModel.visibleCities.enumerated()), id: \.element.id) { index, city in
-                                NavigationLink(value: city) {
-                                    CityRowView(
-                                        city: city,
-                                        isFavorite: viewModel.isFavorite(city),
-                                        onFavoriteTapped: { viewModel.toggleFavorite(city) }
-                                    )
-                                    .background(
-                                        index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.10)
-                                    )
-                                }
-                                .buttonStyle(.plain)
+                    // Landscape placeholder for now
+                    VStack {
+                        Text("Landscape detected – portrait behavior not implemented yet")
+                            .foregroundColor(.secondary)
+                            .padding()
+                        Spacer()
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func portraitView() -> some View {
+        VStack(spacing: 8) {
+            if viewModel.isLoading {
+                ProgressView("Loading cities…")
+                    .padding()
+            } else if let error = viewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+                    .padding()
+            } else {
+                CitiesSearchBar(viewModel: viewModel)
+                    .padding(.vertical, 4)
+                    .padding(.trailing, 8)
+
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(viewModel.visibleCities.enumerated()), id: \.element.id) { index, city in
+                            NavigationLink(value: city) {
+                                CityRowView(
+                                    city: city,
+                                    isFavorite: viewModel.isFavorite(city),
+                                    onFavoriteTapped: { viewModel.toggleFavorite(city) }
+                                )
+                                .background(
+                                    index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.10)
+                                )
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
             }
-            .background(Color.white)
-            .navigationDestination(for: CityModel.self) { city in
-                CityMapView(city: city)
-            }
-            .onAppear { Task { await viewModel.loadCities() } }
         }
+        .background(Color.white)
+        .navigationDestination(for: CityModel.self) { city in
+            CityMapView(city: city)
+        }
+        .onAppear { Task { await viewModel.loadCities() } }
     }
 }
 
