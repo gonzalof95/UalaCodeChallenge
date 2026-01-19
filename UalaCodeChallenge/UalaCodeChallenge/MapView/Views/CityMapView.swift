@@ -64,5 +64,6 @@ struct PlaceholderMapView: View {
                 .foregroundColor(.secondary)
                 .font(.headline)
         }
+        .accessibilityIdentifier("map_placeholder")
     }
 }

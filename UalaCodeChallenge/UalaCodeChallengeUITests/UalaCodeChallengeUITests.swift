@@ -52,6 +52,35 @@ final class UalaCodeChallengeUITests: XCTestCase {
         let map = app.otherElements["city_map"]
         XCTAssertTrue(map.waitForExistence(timeout: 5))
     }
+    
+    @MainActor
+    func testSearchFiltersCities() {
+        let app = XCUIApplication()
+        app.launch()
+
+        let list = app.scrollViews["cities_list"]
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+
+        let searchBar = app.textFields["search_bar"]
+        XCTAssertTrue(searchBar.waitForExistence(timeout: 5))
+
+        // Count rows before search
+        let allCities = app.buttons.matching(NSPredicate(
+            format: "identifier BEGINSWITH %@", "city_row_"
+        ))
+        let initialCount = allCities.count
+        XCTAssertGreaterThan(initialCount, 0)
+
+        // Type something
+        searchBar.tap()
+        searchBar.typeText("London") // e.g. "London"
+
+        // Let SwiftUI settle
+        sleep(1)
+
+        let filteredCount = allCities.count
+        XCTAssertLessThan(filteredCount, initialCount)
+    }
 
     @MainActor
     func testLaunchPerformance() throws {
