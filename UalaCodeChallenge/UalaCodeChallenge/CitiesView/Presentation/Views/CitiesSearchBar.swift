@@ -15,6 +15,7 @@ struct CitiesSearchBar: View {
             TextField("Search cities", text: $viewModel.searchText)
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
+                .accessibilityIdentifier("search_bar")
 
             Button(action: { viewModel.showFavoritesOnly.toggle() }) {
                 Image(systemName: viewModel.showFavoritesOnly ? "heart.fill" : "heart")

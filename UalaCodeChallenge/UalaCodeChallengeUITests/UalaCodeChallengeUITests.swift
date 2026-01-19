@@ -23,12 +23,34 @@ final class UalaCodeChallengeUITests: XCTestCase {
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testCitiesListIsShownOnLaunch() {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        let list = app.scrollViews["cities_list"]
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+    }
+    
+    @MainActor
+    func testTappingCityShowsMap() {
+        let app = XCUIApplication()
+        app.launch()
+
+        // Wait for list
+        let list = app.scrollViews["cities_list"]
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+
+        // Tap first city row
+        let firstCity = app.buttons.matching(NSPredicate(
+            format: "identifier BEGINSWITH %@", "city_row_"
+        )).firstMatch
+
+        XCTAssertTrue(firstCity.waitForExistence(timeout: 5))
+        firstCity.tap()
+
+        // Assert map is shown
+        let map = app.otherElements["city_map"]
+        XCTAssertTrue(map.waitForExistence(timeout: 5))
     }
 
     @MainActor

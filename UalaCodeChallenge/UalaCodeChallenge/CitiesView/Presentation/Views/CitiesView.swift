@@ -36,6 +36,7 @@ struct PortraitCitiesView: View {
                     isFavorite: viewModel.isFavorite(city),
                     onFavoriteTapped: { viewModel.toggleFavorite(city) }
                 )
+                .accessibilityIdentifier("city_row_\(city.id)")
                 .padding(.leading, 8)
             }
             .buttonStyle(.plain)
@@ -64,6 +65,7 @@ struct LandscapeCitiesView: View {
                             viewModel.toggleFavorite(city)
                         }
                     )
+                    .accessibilityIdentifier("city_row_\(city.id)")
                     .padding(.horizontal, 8)
                 }
                 .buttonStyle(.plain)

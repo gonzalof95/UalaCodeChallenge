@@ -32,10 +32,9 @@ struct CityMapView: View {
             Map(position: $cameraPosition, interactionModes: .all) {
                 Marker("City", coordinate: CLLocationCoordinate2D(latitude: city.coord.lat, longitude: city.coord.lon))
             }
+            .accessibilityIdentifier("city_map")
             .animation(.easeInOut(duration: 1.0), value: cameraPosition)
-            //.ignoresSafeArea(edges: .all)
         }
-        //.ignoresSafeArea(edges: .all)
         .onAppear {
             animateZoomToCity()
         }

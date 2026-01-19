@@ -29,6 +29,7 @@ struct CityRowView: View {
                 Image(systemName: isFavorite ? "heart.fill" : "heart")
                     .foregroundColor(isFavorite ? .red : .gray)
             }
+            .accessibilityIdentifier("favorite_button_\(city.id)")
             .padding(.trailing, 8)
             .buttonStyle(.plain)
         }

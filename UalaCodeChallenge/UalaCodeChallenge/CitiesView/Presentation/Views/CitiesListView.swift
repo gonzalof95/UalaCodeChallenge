@@ -61,6 +61,7 @@ struct CitiesListView<RowContent: View>: View {
                     }
                 }
             }
+            .accessibilityIdentifier("cities_list")
         }
     }
 
