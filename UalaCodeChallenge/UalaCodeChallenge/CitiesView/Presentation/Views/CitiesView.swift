@@ -90,13 +90,13 @@ struct CitiesView: View {
     }
 }
 
+
 struct LandscapeCitiesView: View {
     @ObservedObject var viewModel: CitiesViewModel
     @State private var selectedCity: CityModel? = nil
 
     var body: some View {
         HStack(spacing: 0) {
-            // Left side: city list
             VStack(spacing: 0) {
                 CitiesSearchBar(viewModel: viewModel)
                     .padding(.vertical, 4)
@@ -116,21 +116,21 @@ struct LandscapeCitiesView: View {
                                 .background(
                                     index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.10)
                                 )
+                                .padding(.horizontal, 8)
                             }
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.vertical, 4)
                 }
+                .frame(maxHeight: .infinity)
             }
-            .frame(maxWidth: .infinity)
+            .frame(width: screenBounds.width / 2, height: screenBounds.height)
             .background(Color.white)
 
-            // Right side: Map or placeholder
             Group {
                 if let city = selectedCity {
                     CityMapView(city: city)
-                        .id(city.id) 
+                        .id(city.id)
                 } else {
                     ZStack {
                         Color.gray.opacity(0.1)
@@ -140,9 +140,18 @@ struct LandscapeCitiesView: View {
                     }
                 }
             }
-            .frame(maxWidth: .infinity)
-
+            .frame(width: screenBounds.width / 2, height: screenBounds.height)
         }
         .onAppear { Task { await viewModel.loadCities() } }
+    }
+}
+
+extension View {
+    var screenBounds: CGRect {
+        let screen = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.screen
+        
+        return screen?.bounds ?? CGRect(x: 0, y: 0, width: 350, height: 700)
     }
 }
