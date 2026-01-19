@@ -23,23 +23,18 @@ final class CityMapViewModel: ObservableObject {
         )
 
         cameraPosition = .camera(initialCamera)
-        animateZoomToCity(city: city)
+        zoomToCity(city: city)
     }
 
-    private func animateZoomToCity(city: City) {
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 300_000_000)
+    func zoomToCity(city: City) {
+        let targetCamera = MapCamera(
+            centerCoordinate: CLLocationCoordinate2D(
+                latitude: city.coord.lat,
+                longitude: city.coord.lon
+            ),
+            distance: 12000
+        )
 
-            withAnimation(.easeInOut(duration: 1.0)) {
-                let closerCamera = MapCamera(
-                    centerCoordinate: CLLocationCoordinate2D(
-                        latitude: city.coord.lat,
-                        longitude: city.coord.lon
-                    ),
-                    distance: 12000
-                )
-                cameraPosition = .camera(closerCamera)
-            }
-        }
+        cameraPosition = .camera(targetCamera) // SwiftUI animates automatically
     }
 }

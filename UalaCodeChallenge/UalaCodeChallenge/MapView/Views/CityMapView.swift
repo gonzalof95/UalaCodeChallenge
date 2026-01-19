@@ -17,6 +17,7 @@ struct CityMapView: View {
             Map(position: $viewModel.cameraPosition, interactionModes: .all) {
                 Marker("City", coordinate: viewModel.cameraPosition.camera?.centerCoordinate ?? .init(latitude: 0, longitude: 0))
             }
+            .animation(.easeInOut(duration: 3.0), value: viewModel.cameraPosition)
             .ignoresSafeArea()
         }
     }
