@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct City: nonisolated Decodable, Identifiable {
+struct City: nonisolated Decodable, Identifiable, Hashable {
     let id: Int
     let name: String
     let country: String
@@ -21,7 +21,7 @@ struct City: nonisolated Decodable, Identifiable {
     }
 }
 
-struct Coordinate: Decodable {
+struct Coordinate: Decodable, Hashable {
     let lon: Double
     let lat: Double
 }
