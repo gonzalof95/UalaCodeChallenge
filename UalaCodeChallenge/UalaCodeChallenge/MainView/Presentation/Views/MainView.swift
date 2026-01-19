@@ -7,32 +7,24 @@
 
 import SwiftUI
 
-struct CityRowView: View {
-    let city: City
-    let isFavorite: Bool
-    let onFavoriteTapped: () -> Void
+struct CitiesSearchBar: View {
+    @ObservedObject var viewModel: CitiesViewModel
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(city.name), \(city.country)")
-                    .font(.headline)
+            TextField("Search cities", text: $viewModel.searchText)
+                .textFieldStyle(.roundedBorder)
+                .padding(.horizontal)
 
-                Text("Lat: \(city.coord.lat), Lon: \(city.coord.lon)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-            Button(action: onFavoriteTapped) {
-                Image(systemName: isFavorite ? "heart.fill" : "heart")
-                    .foregroundColor(isFavorite ? .red : .gray)
+            Button(action: { viewModel.showFavoritesOnly.toggle() }) {
+                Image(systemName: viewModel.showFavoritesOnly ? "heart.fill" : "heart")
+                    .foregroundColor(viewModel.showFavoritesOnly ? .red : .gray)
+                    .padding(.trailing)
             }
             .buttonStyle(.plain)
+            .help("Show only favorites")
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal)
+        .padding(.vertical, 4)
     }
 }
 
@@ -40,46 +32,42 @@ struct CitiesView: View {
     @ObservedObject var viewModel: CitiesViewModel
 
     var body: some View {
-        VStack {
+        VStack(spacing: 8) {
             if viewModel.isLoading {
-
                 ProgressView("Loading cities…")
                     .padding()
 
             } else if let error = viewModel.errorMessage {
-
                 Text(error)
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding()
 
             } else {
+                CitiesSearchBar(viewModel: viewModel)
+                    .padding(.vertical, 4)
+                
                 List {
                     ForEach(Array(viewModel.visibleCities.enumerated()), id: \.element.id) { index, city in
                         CityRowView(
                             city: city,
                             isFavorite: viewModel.isFavorite(city),
-                            onFavoriteTapped: {
-                                viewModel.toggleFavorite(city)
-                            }
+                            onFavoriteTapped: { viewModel.toggleFavorite(city) }
                         )
-                        .listRowInsets(EdgeInsets()) // full width
+                        .listRowInsets(EdgeInsets())
                         .background(
-                            index.isMultiple(of: 2)
-                                ? Color.white
-                                : Color.gray.opacity(0.05)
+                            index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.05)
                         )
+                        .listRowSeparator(.hidden)
                     }
                 }
                 .listStyle(.plain)
             }
         }
         .background(Color.white)
-        .searchable(text: $viewModel.searchText, prompt: "Search cities")
         .onAppear {
-            Task {
-                await viewModel.loadCities()
-            }
+            Task { await viewModel.loadCities() }
         }
     }
 }
+
