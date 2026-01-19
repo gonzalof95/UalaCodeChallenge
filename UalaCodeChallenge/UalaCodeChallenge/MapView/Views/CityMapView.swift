@@ -55,3 +55,15 @@ struct CityMapView: View {
         }
     }
 }
+
+/// Used to show when a city is not yet selected in MapView, when phone is on Landscape mode
+struct PlaceholderMapView: View {
+    var body: some View {
+        ZStack {
+            Color.gray.opacity(0.1)
+            Text("Select a city to show on the map")
+                .foregroundColor(.secondary)
+                .font(.headline)
+        }
+    }
+}
