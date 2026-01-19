@@ -40,12 +40,7 @@ struct CitiesView: View {
                     portraitView()
                 } else {
                     // Landscape placeholder for now
-                    VStack {
-                        Text("Landscape detected – portrait behavior not implemented yet")
-                            .foregroundColor(.secondary)
-                            .padding()
-                        Spacer()
-                    }
+                    LandscapeCitiesView(viewModel: viewModel)
                 }
             }
         }
@@ -76,6 +71,7 @@ struct CitiesView: View {
                                     isFavorite: viewModel.isFavorite(city),
                                     onFavoriteTapped: { viewModel.toggleFavorite(city) }
                                 )
+                                .padding(.leading, 8)
                                 .background(
                                     index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.10)
                                 )
@@ -94,3 +90,59 @@ struct CitiesView: View {
     }
 }
 
+struct LandscapeCitiesView: View {
+    @ObservedObject var viewModel: CitiesViewModel
+    @State private var selectedCity: CityModel? = nil
+
+    var body: some View {
+        HStack(spacing: 0) {
+            // Left side: city list
+            VStack(spacing: 0) {
+                CitiesSearchBar(viewModel: viewModel)
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(viewModel.visibleCities.enumerated()), id: \.element.id) { index, city in
+                            Button {
+                                selectedCity = city
+                            } label: {
+                                CityRowView(
+                                    city: city,
+                                    isFavorite: viewModel.isFavorite(city),
+                                    onFavoriteTapped: { viewModel.toggleFavorite(city) }
+                                )
+                                .background(
+                                    index.isMultiple(of: 2) ? Color.white : Color.gray.opacity(0.10)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+
+            // Right side: Map or placeholder
+            Group {
+                if let city = selectedCity {
+                    CityMapView(city: city)
+                        .id(city.id) 
+                } else {
+                    ZStack {
+                        Color.gray.opacity(0.1)
+                        Text("Select a city to show on the map")
+                            .foregroundColor(.secondary)
+                            .font(.headline)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+
+        }
+        .onAppear { Task { await viewModel.loadCities() } }
+    }
+}

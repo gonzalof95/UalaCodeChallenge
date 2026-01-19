@@ -17,12 +17,10 @@ struct CityRowView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(city.name), \(city.country)")
                     .font(.headline)
-                    .padding(.leading, 8)
                 
                 Text("Lat: \(city.coord.lat), Lon: \(city.coord.lon)")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .padding(.leading, 8)
             }
 
             Spacer()
